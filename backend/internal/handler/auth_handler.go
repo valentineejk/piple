@@ -35,32 +35,27 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	// generate access and refresh tokens
-	accessToken, err := service.GenerateAccessToken(user.ID.String(), user.Role)
+	tokens, err := service.GenerateTokenPair(user.ID.String(), user.Role)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.NewErrorResponse(http.StatusInternalServerError, "Failed to generate access token"))
+		c.JSON(http.StatusInternalServerError, model.NewErrorResponse(http.StatusInternalServerError, "Failed to generate tokens"))
 		return
 	}
 
-	refreshToken, err := service.GenerateRefresh(user.ID.String(), user.Role)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.NewErrorResponse(http.StatusInternalServerError, "Failed to generate refresh token"))
-		return
-	}
-
-	refreshHash := helpers.HashToken(refreshToken)
-	refreshExpiresAt := time.Now().Add(7 * 24 * time.Hour)
-	if _, err := h.queries.CreateRefreshToken(c, dbq.CreateRefreshTokenParams{
-		UserID:    user.ID,
-		TokenHash: refreshHash,
-		ExpiresAt: refreshExpiresAt,
-	}); err != nil {
+	if err := service.SaveRefreshToken(func(tokenHash string, expiresAt time.Time) error {
+		_, err := h.queries.CreateRefreshToken(c, dbq.CreateRefreshTokenParams{
+			UserID:    user.ID,
+			TokenHash: tokenHash,
+			ExpiresAt: expiresAt,
+		})
+		return err
+	}, tokens.RefreshToken); err != nil {
 		c.JSON(http.StatusInternalServerError, model.NewErrorResponse(http.StatusInternalServerError, "Failed to store refresh token"))
 		return
 	}
 
 	c.JSON(http.StatusOK, model.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
 	})
 }
 

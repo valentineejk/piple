@@ -6,7 +6,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/valentineejk/piple/internal/helpers"
 )
+
+type CreateRefreshTokenFn func(tokenHash string, expiresAt time.Time) error
+
+func SaveRefreshToken(function CreateRefreshTokenFn, rawToken string) error {
+	tokenHash := helpers.HashToken(rawToken)
+	return function(tokenHash, time.Now().Add(7*24*time.Hour))
+}
 
 const (
 	accessTokenDuration  = 15 * time.Minute
@@ -59,6 +67,23 @@ func GenerateRefresh(UserID string, Role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret())
 
+}
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+func GenerateTokenPair(UserID, Role string) (*TokenPair, error) {
+	accessToken, err := GenerateAccessToken(UserID, Role)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := GenerateRefresh(UserID, Role)
+	if err != nil {
+		return nil, err
+	}
+	return &TokenPair{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 }
 
 func Validate(tokenStr string) (*Claims, error) {

@@ -7,6 +7,8 @@ import (
 	"github.com/joho/godotenv"
 	db "github.com/valentineejk/piple/db/postgres"
 	"github.com/valentineejk/piple/internal/handler"
+	"github.com/valentineejk/piple/internal/middleware"
+	"github.com/valentineejk/piple/internal/model"
 )
 
 func main() {
@@ -28,6 +30,7 @@ func main() {
 	v1.GET("/health", h.HealthCheck)
 	auth := v1.Group("/auth")
 	auth.POST("/login", h.Login)
+	auth.POST("/register", middleware.AuthRequired(), middleware.RoleRequired(model.RoleAdmin), h.Register)
 	auth.POST("/refresh", h.Refresh)
 	auth.POST("/logout", h.Logout)
 
