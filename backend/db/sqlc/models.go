@@ -64,12 +64,12 @@ type Payout struct {
 }
 
 type RefreshToken struct {
-	ID        string             `json:"id"`
-	UserID    string             `json:"user_id"`
-	TokenHash string             `json:"token_hash"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	Revoked   bool               `json:"revoked"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID        pgtype.UUID      `json:"id"`
+	UserID    pgtype.UUID      `json:"user_id"`
+	TokenHash string           `json:"token_hash"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
+	RevokedAt pgtype.Timestamp `json:"revoked_at"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type SalaryCode struct {
