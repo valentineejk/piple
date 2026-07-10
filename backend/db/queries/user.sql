@@ -1,33 +1,30 @@
 -- name: CreateUser :one
-INSERT INTO users (first_name, last_name, email, password, role, created_at)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING *;
+INSERT INTO users (
+  first_name,
+  last_name,
+  email,
+  password,
+  role
+) VALUES (
+  $1, $2, $3, $4, $5
+)
+RETURNING id, first_name, last_name, email, password, role, created_at;
 
--- name: GetUser :one
-SELECT * FROM users
+-- name: GetUserByID :one
+SELECT id, first_name, last_name, email, password, role, created_at
+FROM users
 WHERE id = $1;
 
 -- name: GetUserByEmail :one
-SELECT * FROM users
+SELECT id, first_name, last_name, email, password, role, created_at
+FROM users
 WHERE email = $1;
 
--- name: Getallusers, filter by role, status
-SELECT * 
-FROM users 
-WHERE 
-    status = COALESCE(NULLIF(:input_status, ''), status)
-    AND role = COALESCE(NULLIF(:input_role, ''), role);
+-- name: GetallUsers :many
+SELECT * FROM users
+WHERE (sqlc.narg('role')::text IS NULL OR role = sqlc.narg('role'))
+  AND (sqlc.narg('status')::text IS NULL OR status = sqlc.narg('status'))
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
 
 
--- existing user 
-SELECT EXISTS (SELECT 1 FROM users WHERE email = $1) AS exists;
-
--- name: UpdateUser :one
-UPDATE users
-SET first_name = $2, last_name = $3, email = $4, password = $5, role = $6
-WHERE id = $1
-RETURNING *;
-
--- name: DeleteUser :exec
-DELETE FROM users
-WHERE id = $1;

@@ -27,12 +27,21 @@ func main() {
 	router := gin.Default()
 
 	v1 := router.Group("/api/v1")
+
 	v1.GET("/health", h.HealthCheck)
 	auth := v1.Group("/auth")
 	auth.POST("/login", h.Login)
 	auth.POST("/register", middleware.AuthRequired(), middleware.RoleRequired(model.RoleAdmin), h.Register)
 	auth.POST("/refresh", h.Refresh)
 	auth.POST("/logout", h.Logout)
+
+	users := v1.Group("/users")
+	{
+		users.GET("/:id", h.GetUserByID)
+		users.GET("/me", middleware.AuthRequired(), h.GetCurrentUserByToken)
+		users.GET("/", h.GetAllUsers)
+
+	}
 
 	log.Printf("server running on port %s", PORT)
 	router.Run(PORT)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	dbq "github.com/valentineejk/piple/db/sqlc"
 	"github.com/valentineejk/piple/internal/helpers"
 	"github.com/valentineejk/piple/internal/model"
@@ -45,7 +46,7 @@ func (h *Handler) Login(c *gin.Context) {
 		_, err := h.queries.CreateRefreshToken(c, dbq.CreateRefreshTokenParams{
 			UserID:    user.ID,
 			TokenHash: tokenHash,
-			ExpiresAt: expiresAt,
+			ExpiresAt: pgtype.Timestamp{Time: expiresAt, Valid: true},
 		})
 		return err
 	}, tokens.RefreshToken); err != nil {
