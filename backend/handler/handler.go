@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	dbq "github.com/valentineejk/piple/db/sqlc"
+	"github.com/valentineejk/piple/db/sqlc"
 	"github.com/valentineejk/piple/helpers"
 	model "github.com/valentineejk/piple/modal"
 )

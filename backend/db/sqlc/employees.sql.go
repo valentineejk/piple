@@ -3,7 +3,7 @@
 //   sqlc v1.31.1
 // source: employees.sql
 
-package db
+package dbq
 
 import (
 	"context"
