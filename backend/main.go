@@ -35,10 +35,10 @@ func main() {
 	auth.POST("/refresh", h.Refresh)
 	auth.POST("/logout", h.Logout)
 
-	users := v1.Group("/users")
+	users := v1.Group("/users", middleware.AuthRequired())
 	{
 		users.GET("/:id", h.GetUserByID)
-		users.GET("/me", middleware.AuthRequired(), h.GetCurrentUserByToken)
+		users.GET("/me", h.GetCurrentUserByToken)
 		users.GET("/", h.GetAllUsers)
 
 	}
