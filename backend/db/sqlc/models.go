@@ -67,9 +67,9 @@ type RefreshToken struct {
 	ID        pgtype.UUID      `json:"id"`
 	UserID    pgtype.UUID      `json:"user_id"`
 	TokenHash string           `json:"token_hash"`
-	ExpiresAt pgtype.Timestamp  `json:"expires_at"`
-	RevokedAt pgtype.Timestamp  `json:"revoked_at"`
-	CreatedAt pgtype.Timestamp  `json:"created_at"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
+	RevokedAt pgtype.Timestamp `json:"revoked_at"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type SalaryCode struct {
