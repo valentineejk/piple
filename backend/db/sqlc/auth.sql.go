@@ -63,7 +63,7 @@ func (q *Queries) GetRefreshTokenByHash(ctx context.Context, tokenHash string) (
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, first_name, last_name, email, password, role, created_at, deleted_at FROM users
+SELECT id, first_name, last_name, email, password, role, status, created_at, deleted_at FROM users
 WHERE email = $1 AND deleted_at IS NULL
 `
 
@@ -77,6 +77,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -84,7 +85,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, first_name, last_name, email, password, role, created_at, deleted_at FROM users
+SELECT id, first_name, last_name, email, password, role, status, created_at, deleted_at FROM users
 WHERE id = $1 AND deleted_at IS NULL
 `
 
@@ -98,6 +99,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -130,7 +132,7 @@ const updateUserPassword = `-- name: UpdateUserPassword :one
 UPDATE users
 SET password = $2
 WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, first_name, last_name, email, password, role, created_at, deleted_at
+RETURNING id, first_name, last_name, email, password, role, status, created_at, deleted_at
 `
 
 type UpdateUserPasswordParams struct {
@@ -148,6 +150,7 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)

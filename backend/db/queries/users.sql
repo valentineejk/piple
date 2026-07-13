@@ -15,6 +15,13 @@ SET
 WHERE id = sqlc.arg('id') AND deleted_at IS NULL
 RETURNING *;
 
+-- name: GetAllUsers :many
+SELECT * FROM users
+WHERE deleted_at IS NULL
+  AND (sqlc.narg('role')::text IS NULL OR role = sqlc.narg('role'))
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
 -- name: SoftDeleteUser :one
 UPDATE users
 SET deleted_at = now()

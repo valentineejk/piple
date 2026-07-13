@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (first_name, last_name, email, password, role)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, first_name, last_name, email, password, role, created_at, deleted_at
+RETURNING id, first_name, last_name, email, password, role, status, created_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -41,17 +41,62 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
 	return i, err
 }
 
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, first_name, last_name, email, password, role, status, created_at, deleted_at FROM users
+WHERE deleted_at IS NULL
+  AND ($3::text IS NULL OR role = $3)
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type GetAllUsersParams struct {
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+	Role   *string `json:"role"`
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers, arg.Limit, arg.Offset, arg.Role)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Password,
+			&i.Role,
+			&i.Status,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const softDeleteUser = `-- name: SoftDeleteUser :one
 UPDATE users
 SET deleted_at = now()
 WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, first_name, last_name, email, password, role, created_at, deleted_at
+RETURNING id, first_name, last_name, email, password, role, status, created_at, deleted_at
 `
 
 func (q *Queries) SoftDeleteUser(ctx context.Context, id pgtype.UUID) (User, error) {
@@ -64,6 +109,7 @@ func (q *Queries) SoftDeleteUser(ctx context.Context, id pgtype.UUID) (User, err
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)
@@ -78,7 +124,7 @@ SET
   email      = COALESCE($3, email),
   role       = COALESCE($4, role)
 WHERE id = $5 AND deleted_at IS NULL
-RETURNING id, first_name, last_name, email, password, role, created_at, deleted_at
+RETURNING id, first_name, last_name, email, password, role, status, created_at, deleted_at
 `
 
 type UpdateUserParams struct {
@@ -107,6 +153,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 		&i.DeletedAt,
 	)

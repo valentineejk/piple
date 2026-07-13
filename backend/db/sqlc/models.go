@@ -99,6 +99,7 @@ type User struct {
 	Email     string           `json:"email"`
 	Password  string           `json:"password"`
 	Role      string           `json:"role"`
+	Status    string           `json:"status"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	DeletedAt pgtype.Timestamp `json:"deleted_at"`
 }

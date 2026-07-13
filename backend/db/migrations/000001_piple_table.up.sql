@@ -44,6 +44,7 @@ CREATE TABLE "users" (
   "email" text UNIQUE NOT NULL,
   "password" varchar NOT NULL,
   "role" text NOT NULL DEFAULT 'employee' CHECK ("role" IN ('employee', 'procurement', 'ceo', 'admin')),
+  "status" text NOT NULL DEFAULT 'active' CHECK ("status" IN ('active', 'inactive', 'terminated', 'on_leave')),
   "created_at" timestamp DEFAULT (now())
 );
 

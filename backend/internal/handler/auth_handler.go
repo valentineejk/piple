@@ -99,7 +99,9 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, model.NewSuccessResponse(http.StatusCreated, "User created successfully", model.FromUserToUserResponse(newUser)))
+	c.JSON(http.StatusCreated,
+		model.NewSuccessResponse(http.StatusCreated, "User created successfully",
+			model.FromUserToUserResponse(newUser)))
 
 }
 
