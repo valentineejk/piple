@@ -11,6 +11,13 @@ import (
 )
 
 type Querier interface {
+	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) (Employee, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteEmployee(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error)
+	GetEmployeeByUserID(ctx context.Context, userID pgtype.UUID) (Employee, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) (Employee, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)

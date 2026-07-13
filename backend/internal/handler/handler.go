@@ -5,7 +5,6 @@ import (
 	dbq "github.com/valentineejk/piple/db/sqlc"
 )
 
-
 type Handler struct {
 	queries *dbq.Queries
 }
@@ -15,8 +14,6 @@ func New(queries *dbq.Queries) *Handler {
 		queries: queries,
 	}
 }
-
-
 
 func (h *Handler) HealthCheck(c *gin.Context) {
 	c.JSON(200, gin.H{
