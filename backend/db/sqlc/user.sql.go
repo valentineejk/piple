@@ -21,7 +21,7 @@ INSERT INTO users (
 ) VALUES (
   $1, $2, $3, $4, $5
 )
-RETURNING id, first_name, last_name, email, password, role, created_at
+RETURNING id, first_name, last_name, email, password, role, status, created_at
 `
 
 type CreateUserParams struct {
@@ -32,17 +32,7 @@ type CreateUserParams struct {
 	Role      string `json:"role"`
 }
 
-type CreateUserRow struct {
-	ID        pgtype.UUID      `json:"id"`
-	FirstName string           `json:"first_name"`
-	LastName  string           `json:"last_name"`
-	Email     string           `json:"email"`
-	Password  string           `json:"password"`
-	Role      string           `json:"role"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.FirstName,
 		arg.LastName,
@@ -50,7 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.Password,
 		arg.Role,
 	)
-	var i CreateUserRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
@@ -58,6 +48,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.Status,
 		&i.CreatedAt,
 	)
 	return i, err

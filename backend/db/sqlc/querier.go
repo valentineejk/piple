@@ -13,7 +13,7 @@ import (
 type Querier interface {
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) (Employee, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
-	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteEmployee(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error)
 	GetEmployeeByUserID(ctx context.Context, userID pgtype.UUID) (Employee, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)

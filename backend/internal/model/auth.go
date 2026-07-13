@@ -33,6 +33,7 @@ type UserResponse struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Role      Role   `json:"role"`
+	Status    string `json:"status"`
 }
 
 func FromUserToUserResponse(user dbq.User) UserResponse {
@@ -42,5 +43,6 @@ func FromUserToUserResponse(user dbq.User) UserResponse {
 		LastName:  user.LastName,
 		Email:     user.Email,
 		Role:      Role(user.Role),
+		Status:    user.Status,
 	}
 }
