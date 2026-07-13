@@ -1,5 +1,3 @@
-
-
 -- name: UpdateUserPassword :one
 UPDATE users
 SET password = $2
