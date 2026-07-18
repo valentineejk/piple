@@ -3,8 +3,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { useCreateEmployee, useUpdateEmployee, useUsers } from '@/lib/hooks'
-import { uuidToString } from '@/lib/format'
+import {
+  useCreateEmployee,
+  useSalaryCodes,
+  useUpdateEmployee,
+  useUsers,
+} from '@/lib/hooks'
+import { formatMoney, uuidToString } from '@/lib/format'
 import { useAuth } from '@/features/auth/auth-context'
 import {
   EMPLOYEE_STATUSES,
@@ -75,6 +80,10 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, onSaved }: Pr
   const { data: usersData } = useUsers(isAdmin && open ? { role: 'employee' } : {})
   const users = isAdmin ? usersData?.data ?? [] : []
 
+  // Salary codes are readable by any authenticated user.
+  const { data: salaryCodesData } = useSalaryCodes(open ? { limit: 50 } : {})
+  const salaryCodes = salaryCodesData?.data ?? []
+
   const {
     register,
     handleSubmit,
@@ -109,6 +118,7 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, onSaved }: Pr
 
   const userId = watch('user_id')
   const status = watch('status')
+  const salaryCodeId = watch('salary_code_id')
 
   const onSubmit = async (raw: FormValues) => {
     const values = schema.parse(raw)
@@ -219,12 +229,26 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, onSaved }: Pr
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="salary_code_id">Salary code ID</Label>
-              <Input
-                id="salary_code_id"
-                placeholder="Salary code UUID"
-                {...register('salary_code_id')}
-              />
+              <Label>Salary code</Label>
+              {salaryCodes.length > 0 ? (
+                <Select
+                  value={salaryCodeId}
+                  onValueChange={(v) => setValue('salary_code_id', v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a salary code" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {salaryCodes.map((sc) => (
+                      <SelectItem key={sc.id} value={sc.id}>
+                        {sc.code} · {sc.level} · {formatMoney(sc.amount)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input placeholder="Salary code UUID" {...register('salary_code_id')} />
+              )}
               {errors.salary_code_id && (
                 <p className="text-xs text-destructive">{errors.salary_code_id.message}</p>
               )}

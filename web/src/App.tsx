@@ -5,8 +5,12 @@ import { LoginPage } from '@/pages/login'
 import { DashboardPage } from '@/pages/dashboard'
 import { UsersPage } from '@/pages/users'
 import { EmployeesPage } from '@/pages/employees'
+import { SalaryCodesPage } from '@/pages/salary-codes'
+import { WalletPage } from '@/pages/wallet'
+import { PaymentRequestsPage } from '@/pages/payment-requests'
+import { PayoutsPage } from '@/pages/payouts'
+import { TransactionsPage } from '@/pages/transactions'
 import { ProfilePage } from '@/pages/profile'
-import { ComingSoonPage } from '@/pages/coming-soon'
 import { NotFoundPage } from '@/pages/not-found'
 
 export default function App() {
@@ -21,48 +25,29 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route
-              path="payroll"
-              element={
-                <ComingSoonPage
-                  title="Payroll"
-                  description="Salary codes, payout runs and history."
-                  endpoints={[
-                    'GET /salary-codes',
-                    'GET /payouts',
-                    'POST /payouts/run',
-                    'POST /payouts/:id/retry',
-                  ]}
-                />
-              }
-            />
           </Route>
 
           {/* Admin-only */}
           <Route element={<ProtectedRoute roles={['admin']} />}>
             <Route element={<AppLayout />}>
               <Route path="users" element={<UsersPage />} />
+              <Route path="salary-codes" element={<SalaryCodesPage />} />
             </Route>
           </Route>
 
-          {/* Admin / CEO only */}
+          {/* Admin / CEO */}
           <Route element={<ProtectedRoute roles={['admin', 'ceo']} />}>
             <Route element={<AppLayout />}>
-              <Route
-                path="wallet"
-                element={
-                  <ComingSoonPage
-                    title="Wallet"
-                    description="Balance, top-ups and the transaction ledger."
-                    endpoints={[
-                      'GET /wallet',
-                      'POST /wallet/topups/initialize',
-                      'GET /wallet/topups',
-                      'GET /transactions',
-                    ]}
-                  />
-                }
-              />
+              <Route path="wallet" element={<WalletPage />} />
+              <Route path="payouts" element={<PayoutsPage />} />
+              <Route path="transactions" element={<TransactionsPage />} />
+            </Route>
+          </Route>
+
+          {/* Admin / CEO / Procurement */}
+          <Route element={<ProtectedRoute roles={['admin', 'ceo', 'procurement']} />}>
+            <Route element={<AppLayout />}>
+              <Route path="payment-requests" element={<PaymentRequestsPage />} />
             </Route>
           </Route>
         </Route>

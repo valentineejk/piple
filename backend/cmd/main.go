@@ -53,6 +53,16 @@ func main() {
 	users.GET("/me", h.GetCurrentUserByToken)
 	users.GET("", h.GetAllUsers)
 
+	// Salary codes (admin only)
+	salaryCodes := v1.Group("/salary-codes", middleware.AuthRequired())
+	salaryCodes.GET("", h.GetAllSalaryCodes)
+	salaryCodes.GET("/:id", h.GetSalaryCodeByID)
+
+	adminSalaryCodes := salaryCodes.Group("", middleware.RoleRequired(model.RoleAdmin))
+	adminSalaryCodes.POST("", h.CreateSalaryCode)
+	adminSalaryCodes.PATCH("/:id", h.UpdateSalaryCode)
+	adminSalaryCodes.DELETE("/:id", h.DeleteSalaryCode)
+
 	log.Printf("server running on port %s", PORT)
 	router.Run(PORT)
 

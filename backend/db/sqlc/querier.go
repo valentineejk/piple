@@ -11,18 +11,78 @@ import (
 )
 
 type Querier interface {
+	// Only a pending request can be approved (guards double-processing).
+	ApprovePaymentRequest(ctx context.Context, arg ApprovePaymentRequestParams) (PaymentRequest, error)
+	CountEmployeesBySalaryCode(ctx context.Context, salaryCodeID pgtype.UUID) (int64, error)
+	CountPaymentRequests(ctx context.Context, arg CountPaymentRequestsParams) (int64, error)
+	CountPayouts(ctx context.Context, arg CountPayoutsParams) (int64, error)
+	CountPayoutsByEmployee(ctx context.Context, userID pgtype.UUID) (int64, error)
+	CountSalaryCodes(ctx context.Context, level *string) (int64, error)
+	CountTransactions(ctx context.Context, arg CountTransactionsParams) (int64, error)
+	CountWalletTopups(ctx context.Context, arg CountWalletTopupsParams) (int64, error)
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) (Employee, error)
+	// ============================================================
+	// Payment requests (procurement -> CEO review)
+	// ============================================================
+	CreatePaymentRequest(ctx context.Context, arg CreatePaymentRequestParams) (PaymentRequest, error)
+	// ============================================================
+	// Payouts (salary disbursement)
+	// ============================================================
+	CreatePayout(ctx context.Context, arg CreatePayoutParams) (Payout, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
+	CreateSalaryCode(ctx context.Context, arg CreateSalaryCodeParams) (SalaryCode, error)
+	// ============================================================
+	// Transactions (immutable ledger)
+	// ============================================================
+	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	// ============================================================
+	// Wallet
+	// ============================================================
+	CreateWallet(ctx context.Context, currency interface{}) (Wallet, error)
+	// ============================================================
+	// Wallet top-ups (add money)
+	// ============================================================
+	CreateWalletTopup(ctx context.Context, arg CreateWalletTopupParams) (WalletTopup, error)
+	CreditWallet(ctx context.Context, arg CreditWalletParams) (Wallet, error)
+	// Atomic guarded debit: returns no row when funds are insufficient, so the
+	// caller can treat pgx.ErrNoRows as "insufficient funds".
+	DebitWallet(ctx context.Context, arg DebitWalletParams) (Wallet, error)
 	DeleteEmployee(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error)
+	DeleteSalaryCode(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error)
 	GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error)
 	GetEmployeeByUserID(ctx context.Context, userID pgtype.UUID) (Employee, error)
+	GetPaymentRequestByID(ctx context.Context, id pgtype.UUID) (PaymentRequest, error)
+	GetPayoutByID(ctx context.Context, id pgtype.UUID) (Payout, error)
+	// Idempotency guard for the monthly batch.
+	GetPayoutByUserAndPeriod(ctx context.Context, arg GetPayoutByUserAndPeriodParams) (Payout, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
+	GetSalaryCodeByCode(ctx context.Context, code string) (SalaryCode, error)
+	GetSalaryCodeByID(ctx context.Context, id pgtype.UUID) (SalaryCode, error)
+	GetTransactionByID(ctx context.Context, id pgtype.UUID) (Transaction, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	// The system runs a single wallet; grab the earliest-created one.
+	GetWallet(ctx context.Context) (Wallet, error)
+	GetWalletByID(ctx context.Context, id pgtype.UUID) (Wallet, error)
+	// Row-lock the wallet inside a transaction before mutating the balance.
+	GetWalletForUpdate(ctx context.Context, id pgtype.UUID) (Wallet, error)
+	GetWalletTopupByID(ctx context.Context, id pgtype.UUID) (WalletTopup, error)
+	GetWalletTopupByReference(ctx context.Context, paystackReference *string) (WalletTopup, error)
+	ListPaymentRequests(ctx context.Context, arg ListPaymentRequestsParams) ([]PaymentRequest, error)
+	ListPayouts(ctx context.Context, arg ListPayoutsParams) ([]Payout, error)
+	// An employee's own payout history (GET /employees/:id/payouts).
+	ListPayoutsByEmployee(ctx context.Context, arg ListPayoutsByEmployeeParams) ([]Payout, error)
+	ListSalaryCodes(ctx context.Context, arg ListSalaryCodesParams) ([]SalaryCode, error)
+	ListTransactions(ctx context.Context, arg ListTransactionsParams) ([]Transaction, error)
+	ListWalletTopups(ctx context.Context, arg ListWalletTopupsParams) ([]WalletTopup, error)
+	MarkWalletTopupStatus(ctx context.Context, arg MarkWalletTopupStatusParams) (WalletTopup, error)
+	RejectPaymentRequest(ctx context.Context, arg RejectPaymentRequestParams) (PaymentRequest, error)
 	RevokeRefreshToken(ctx context.Context, tokenHash string) (RefreshToken, error)
 	SoftDeleteUser(ctx context.Context, id pgtype.UUID) (User, error)
 	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) (Employee, error)
+	UpdatePayoutStatus(ctx context.Context, arg UpdatePayoutStatusParams) (Payout, error)
+	UpdateSalaryCode(ctx context.Context, arg UpdateSalaryCodeParams) (SalaryCode, error)
 	// Partial update: unset (nil) args keep the existing value. Password is
 	// excluded — that's UpdateUserPassword's job.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

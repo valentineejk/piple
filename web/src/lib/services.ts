@@ -1,11 +1,14 @@
 import { api } from './api'
 import type {
   CreateEmployeeRequest,
+  CreateSalaryCodeRequest,
   CreateUserRequest,
   Employee,
   LoginResponse,
   PaginatedMeta,
+  SalaryCode,
   UpdateEmployeeRequest,
+  UpdateSalaryCodeRequest,
   UpdateUserRequest,
   User,
 } from '@/types/api'
@@ -81,6 +84,42 @@ export const employeesService = {
   },
   async remove(id: string): Promise<void> {
     await api.delete(`/employees/${id}`)
+  },
+}
+
+// ---------------- Salary codes ----------------
+interface SalaryCodesListResponse {
+  data: SalaryCode[]
+  meta: PaginatedMeta
+}
+
+export interface SalaryCodeFilters {
+  level?: string
+  page?: number
+  limit?: number
+}
+
+export const salaryCodesService = {
+  async list(filters: SalaryCodeFilters = {}): Promise<SalaryCodesListResponse> {
+    const { data } = await api.get<SalaryCodesListResponse>('/salary-codes', {
+      params: filters,
+    })
+    return data
+  },
+  async get(id: string): Promise<SalaryCode> {
+    const { data } = await api.get<{ data: SalaryCode }>(`/salary-codes/${id}`)
+    return data.data
+  },
+  async create(payload: CreateSalaryCodeRequest): Promise<SalaryCode> {
+    const { data } = await api.post<{ data: SalaryCode }>('/salary-codes', payload)
+    return data.data
+  },
+  async update(id: string, payload: UpdateSalaryCodeRequest): Promise<SalaryCode> {
+    const { data } = await api.patch<{ data: SalaryCode }>(`/salary-codes/${id}`, payload)
+    return data.data
+  },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/salary-codes/${id}`)
   },
 }
 

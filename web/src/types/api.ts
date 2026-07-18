@@ -110,6 +110,24 @@ export type UpdateEmployeeRequest = Partial<
   Omit<CreateEmployeeRequest, 'user_id'> & { status: EmployeeStatus }
 >
 
+// ---------------- Salary codes ----------------
+export interface SalaryCode {
+  id: string
+  code: string
+  level: string
+  amount: number
+}
+
+export interface CreateSalaryCodeRequest {
+  level: string
+  amount: number
+}
+
+export interface UpdateSalaryCodeRequest {
+  level?: string
+  amount?: number
+}
+
 export interface ApiError {
   code?: number
   message?: string

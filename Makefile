@@ -2,7 +2,7 @@
 
 # Run the Go API server (http://localhost:8080)
 backend:
-	cd backend && go run .
+	cd backend && go run ./cmd
 
 # alias kept for backwards compatibility
 start: backend

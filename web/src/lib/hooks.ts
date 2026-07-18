@@ -3,14 +3,18 @@ import { toast } from 'sonner'
 import { getErrorMessage } from './api'
 import {
   employeesService,
+  salaryCodesService,
   systemService,
   usersService,
+  type SalaryCodeFilters,
   type UserFilters,
 } from './services'
 import type {
   CreateEmployeeRequest,
+  CreateSalaryCodeRequest,
   CreateUserRequest,
   UpdateEmployeeRequest,
+  UpdateSalaryCodeRequest,
   UpdateUserRequest,
 } from '@/types/api'
 
@@ -19,6 +23,7 @@ export const qk = {
   user: (id: string) => ['users', id] as const,
   me: ['me'] as const,
   health: ['health'] as const,
+  salaryCodes: (filters: SalaryCodeFilters) => ['salary-codes', filters] as const,
 }
 
 // ---------------- Users ----------------
@@ -107,6 +112,51 @@ export function useDeleteEmployee() {
     onSuccess: () => {
       toast.success('Employee record deleted')
       void qc.invalidateQueries({ queryKey: ['employees'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+}
+
+// ---------------- Salary codes ----------------
+export function useSalaryCodes(filters: SalaryCodeFilters) {
+  return useQuery({
+    queryKey: qk.salaryCodes(filters),
+    queryFn: () => salaryCodesService.list(filters),
+  })
+}
+
+export function useCreateSalaryCode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateSalaryCodeRequest) => salaryCodesService.create(payload),
+    onSuccess: (created) => {
+      toast.success(`Salary code ${created.code} created`)
+      void qc.invalidateQueries({ queryKey: ['salary-codes'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+}
+
+export function useUpdateSalaryCode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateSalaryCodeRequest }) =>
+      salaryCodesService.update(id, payload),
+    onSuccess: () => {
+      toast.success('Salary code updated')
+      void qc.invalidateQueries({ queryKey: ['salary-codes'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+}
+
+export function useDeleteSalaryCode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => salaryCodesService.remove(id),
+    onSuccess: () => {
+      toast.success('Salary code deleted')
+      void qc.invalidateQueries({ queryKey: ['salary-codes'] })
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   })

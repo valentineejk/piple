@@ -2,13 +2,18 @@ import { Link } from 'react-router-dom'
 import {
   Activity,
   ArrowRight,
+  Banknote,
+  FileText,
   ShieldCheck,
   UserCog,
   Users,
   UserSquare,
+  Wallet,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/auth-context'
 import { useHealth, useUsers } from '@/lib/hooks'
+import { formatMoney } from '@/lib/format'
+import { mockPaymentRequests, mockPayouts, mockWallet } from '@/lib/mock-data'
 import { PageHeader } from '@/components/page-header'
 import {
   Card,
@@ -60,12 +65,60 @@ export function DashboardPage() {
   const total = usersData?.meta?.total ?? users.length
   const countByRole = (r: Role) => users.filter((u) => u.role === r).length
 
+  const showFinance = role === 'admin' || role === 'ceo'
+  const pendingApprovals = mockPaymentRequests.filter((r) => r.status === 'pending').length
+  const payoutsNeedingAttention = mockPayouts.filter((p) =>
+    ['failed', 'insufficient_funds'].includes(p.status),
+  ).length
+
   return (
     <div>
       <PageHeader
         title={`Welcome, ${user?.first_name ?? ''}`}
         description="Overview of your payroll workspace."
       />
+
+      {showFinance && (
+        <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Link to="/wallet">
+            <Card className="bg-primary text-primary-foreground transition-opacity hover:opacity-95">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium opacity-90">Wallet balance</CardTitle>
+                <Wallet className="h-4 w-4 opacity-90" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatMoney(mockWallet.balance)}</div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/payment-requests">
+            <Card className="transition-colors hover:bg-accent/40">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Pending approvals
+                </CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{pendingApprovals}</div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/payouts">
+            <Card className="transition-colors hover:bg-accent/40">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Payouts needing attention
+                </CardTitle>
+                <Banknote className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{payoutsNeedingAttention}</div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {isAdmin && (

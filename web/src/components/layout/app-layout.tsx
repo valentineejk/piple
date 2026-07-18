@@ -3,9 +3,12 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   Banknote,
   ChevronDown,
+  FileText,
   LayoutDashboard,
   LogOut,
   Menu,
+  Receipt,
+  Tags,
   Users,
   UserSquare,
   Wallet,
@@ -40,8 +43,16 @@ const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/users', label: 'Users', icon: Users, roles: ['admin'] },
   { to: '/employees', label: 'Employees', icon: UserSquare },
-  { to: '/payroll', label: 'Payroll', icon: Banknote },
+  { to: '/salary-codes', label: 'Salary codes', icon: Tags, roles: ['admin'] },
+  { to: '/payouts', label: 'Payouts', icon: Banknote, roles: ['admin', 'ceo'] },
   { to: '/wallet', label: 'Wallet', icon: Wallet, roles: ['admin', 'ceo'] },
+  {
+    to: '/payment-requests',
+    label: 'Payment requests',
+    icon: FileText,
+    roles: ['admin', 'ceo', 'procurement'],
+  },
+  { to: '/transactions', label: 'Transactions', icon: Receipt, roles: ['admin', 'ceo'] },
 ]
 
 function HealthDot() {

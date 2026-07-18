@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/valentineejk/piple/db/sqlc"
+	dbq "github.com/valentineejk/piple/db/sqlc"
 	"github.com/valentineejk/piple/internal/model"
 )
 
@@ -154,6 +154,7 @@ func (h *Handler) Update_employee(c *gin.Context) {
 func (h *Handler) Delete_employee(c *gin.Context) {
 
 	var id pgtype.UUID
+
 	if err := id.Scan(c.Param("id")); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid employee id"})
 		return
